@@ -1,249 +1,144 @@
 import React, { useState } from 'react';
 
-type Region = {
-  id: string;
-  nameEn: string;
-  nameVi: string;
-  population: number;
-  emissionFactor: number;
+// Define translations for English and Vietnamese
+const translations = {
+  en: {
+    title: "E-waste Calculation",
+    description: "Estimate electronic waste based on population and emission factor.",
+    populationLabel: "Population",
+    emissionFactorLabel: "Emission Factor (kg/person)",
+    calculateButton: "Calculate E-waste",
+    estimatedEwaste: "Estimated E-waste:",
+    unit: "kg",
+    toggleLang: "Tiếng Việt",
+    placeholderPopulation: "Enter population",
+    placeholderEmissionFactor: "Enter emission factor",
+    resultPrefix: "Estimated E-waste: ",
+    resultSuffix: " kg"
+  },
+  vi: {
+    title: "Tính toán chất thải điện tử",
+    description: "Ước tính lượng chất thải điện tử dựa trên dân số và hệ số phát thải.",
+    populationLabel: "Dân số",
+    emissionFactorLabel: "Hệ số phát thải (kg/người)",
+    calculateButton: "Tính toán chất thải điện tử",
+    estimatedEwaste: "Lượng chất thải điện tử ước tính:",
+    unit: "kg",
+    toggleLang: "English",
+    placeholderPopulation: "Nhập dân số",
+    placeholderEmissionFactor: "Nhập hệ số phát thải",
+    resultPrefix: "Lượng chất thải điện tử ước tính: ",
+    resultSuffix: " kg"
+  }
 };
 
-const regionPresets: Region[] = [
-  {
-    id: 'custom',
-    nameEn: 'Custom area',
-    nameVi: 'Khu vực tùy chỉnh',
-    population: 1200000,
-    emissionFactor: 7.3,
-  },
-  {
-    id: 'hanoi',
-    nameEn: 'Hanoi (Urban)',
-    nameVi: 'Hà Nội (Đô thị)',
-    population: 8200000,
-    emissionFactor: 8.4,
-  },
-  {
-    id: 'hcm',
-    nameEn: 'Ho Chi Minh City',
-    nameVi: 'TP. Hồ Chí Minh',
-    population: 9500000,
-    emissionFactor: 8.7,
-  },
-  {
-    id: 'danang',
-    nameEn: 'Da Nang',
-    nameVi: 'Đà Nẵng',
-    population: 1200000,
-    emissionFactor: 7.1,
-  },
-  {
-    id: 'rural',
-    nameEn: 'Rural province (avg.)',
-    nameVi: 'Tỉnh nông thôn (tb.)',
-    population: 1500000,
-    emissionFactor: 5.9,
-  },
-];
+const EwasteCalculator: React.FC = () => {
+  const [population, setPopulation] = useState<number | ''>('');
+  const [emissionFactor, setEmissionFactor] = useState<number | ''>('');
+  const [eWasteResult, setEwasteResult] = useState<number | null>(null);
+  const [language, setLanguage] = useState<'en' | 'vi'>('en');
 
-const formatNumber = (value: number, digits: number = 0) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  }).format(value);
-};
+  // Get current translation object based on selected language
+  const t = translations[language];
 
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <div className='flex items-center justify-between py-2 border-b border-slate-100 last:border-b-0'>
-    <p className='text-sm text-slate-600'>{label}</p>
-    <p className='text-sm font-semibold text-slate-900'>{value}</p>
-  </div>
-);
-
-const QuickTip = () => (
-  <div className='bg-emerald-50 border border-emerald-100 rounded-lg p-4 mt-4'>
-    <p className='text-sm text-emerald-800 font-semibold'>Tip / Gợi ý</p>
-    <p className='text-sm text-emerald-700 mt-1'>
-      Adjust the emission factor if your city has a faster device replacement cycle or many industrial sources. Điều chỉnh hệ số phát thải nếu khu vực của bạn thay thiết bị nhanh hoặc có nhiều nguồn công nghiệp.
-    </p>
-  </div>
-);
-
-const HomePage: React.FC = () => {
-  const [selectedRegion, setSelectedRegion] = useState<string>('custom');
-  const [population, setPopulation] = useState<number>(1200000);
-  const [emissionFactor, setEmissionFactor] = useState<number>(7.3);
-
-  const handleRegionChange = (id: string) => {
-    setSelectedRegion(id);
-    const region = regionPresets.find((r) => r.id === id);
-    if (region) {
-      setPopulation(region.population);
-      setEmissionFactor(region.emissionFactor);
+  // Handle the calculation logic
+  const handleCalculate = () => {
+    if (typeof population === 'number' && typeof emissionFactor === 'number' && population >= 0 && emissionFactor >= 0) {
+      const result = population * emissionFactor;
+      setEwasteResult(result);
+    } else {
+      setEwasteResult(null); // Clear result if inputs are invalid or negative
     }
   };
 
-  const annualKg = population && emissionFactor ? population * emissionFactor : 0;
-  const annualTon = annualKg / 1000;
-  const monthlyTon = annualTon / 12;
-  const perCapitaKg = emissionFactor;
+  // Toggle between English and Vietnamese languages
+  const toggleLanguage = () => {
+    setLanguage(prevLang => (prevLang === 'en' ? 'vi' : 'en'));
+  };
 
   return (
-    <div className='min-h-screen bg-slate-50'>
-      <header className='bg-white border-b border-slate-200'>
-        <div className='max-w-5xl mx-auto px-4 py-6 flex items-center justify-between'>
-          <div className='flex items-center gap-3'>
-            <div className='bg-emerald-100 text-emerald-700 rounded-lg px-3 py-2 font-bold text-sm uppercase tracking-wide'>
-              e-waste
-            </div>
-            <div>
-              <h1 className='text-lg font-semibold text-slate-900'>
-                E-Waste Estimator / Trình tính rác thải điện tử
-              </h1>
-              <p className='text-sm text-slate-500'>
-                Estimate electronic waste from population and emission factors. Ước tính rác thải điện tử từ dân số và hệ số phát thải.
-              </p>
-            </div>
-          </div>
-          <div className='hidden sm:flex items-center gap-3'>
-            <div className='bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16' />
-          </div>
-        </div>
-      </header>
-
-      <main className='max-w-5xl mx-auto px-4 py-8'>
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-          <div className='lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 p-6'>
-            <h2 className='text-base font-semibold text-slate-900 mb-4'>
-              Input data / Nhập dữ liệu
-            </h2>
-            <p className='text-sm text-slate-500 mb-4'>
-              Choose a region or enter your own population and emission factor. Chọn khu vực hoặc nhập dân số và hệ số phát thải.
-            </p>
-            <div className='flex flex-wrap gap-2 mb-6'>
-              {regionPresets.map((region) => (
-                <button
-                  key={region.id}
-                  onClick={() => handleRegionChange(region.id)}
-                  className={`px-3 py-2 rounded-lg text-sm border transition ${
-                    selectedRegion === region.id
-                      ? 'bg-emerald-600 text-white border-emerald-600'
-                      : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-200'
-                  }`}
-                >
-                  {region.nameEn} / {region.nameVi}
-                </button>
-              ))}
-            </div>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
-              <div>
-                <label className='block text-sm font-medium text-slate-700 mb-2'>
-                  Population (people) / Dân số (người)
-                </label>
-                <input
-                  type='number'
-                  min={0}
-                  value={population}
-                  onChange={(e) => setPopulation(Number(e.target.value) || 0)}
-                  className='w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-white'
-                  placeholder='e.g. 1,200,000'
-                />
-                <p className='text-xs text-slate-400 mt-1'>
-                  Number of people in the area. Số người sinh sống tại khu vực.
-                </p>
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-slate-700 mb-2'>
-                  Emission factor (kg/person/year) / Hệ số phát thải (kg/người/năm)
-                </label>
-                <input
-                  type='number'
-                  min={0}
-                  step='0.1'
-                  value={emissionFactor}
-                  onChange={(e) => setEmissionFactor(Number(e.target.value) || 0)}
-                  className='w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-white'
-                  placeholder='e.g. 7.3'
-                />
-                <p className='text-xs text-slate-400 mt-1'>
-                  Average e-waste per person per year. Lượng rác thải điện tử trung bình mỗi người mỗi năm.
-                </p>
-              </div>
-            </div>
-
-            <QuickTip />
-
-            <div className='mt-6'>
-              <h3 className='text-sm font-semibold text-slate-900 mb-2'>
-                Formula / Công thức
-              </h3>
-              <p className='text-sm text-slate-500'>
-                E-Waste (tons/year) = Population × Emission factor ÷ 1000. Rác thải điện tử (tấn/năm) = Dân số × Hệ số phát thải ÷ 1000.
-              </p>
-            </div>
-          </div>
-
-          <div className='bg-white rounded-xl shadow-sm border border-slate-100 p-6'>
-            <h2 className='text-base font-semibold text-slate-900 mb-4'>
-              Result / Kết quả
-            </h2>
-            <InfoRow
-              label='Total e-waste (kg/year) / Tổng rác thải (kg/năm)'
-              value={annualKg > 0 ? `${formatNumber(annualKg, 0)} kg` : '0 kg'}
-            />
-            <InfoRow
-              label='Total e-waste (tons/year) / Tổng rác thải (tấn/năm)'
-              value={annualTon > 0 ? `${formatNumber(annualTon, 2)} t` : '0 t'}
-            />
-            <InfoRow
-              label='Monthly estimate (tons/month) / Ước tính tháng (tấn/tháng)'
-              value={annualTon > 0 ? `${formatNumber(monthlyTon, 2)} t` : '0 t'}
-            />
-            <InfoRow
-              label='Per capita (kg/person/year) / Bình quân đầu người (kg/người/năm)'
-              value={`${formatNumber(perCapitaKg, 1)} kg`}
-            />
-
-            <div className='mt-5 bg-slate-50 rounded-lg p-3'>
-              <p className='text-xs text-slate-500'>
-                This is a preliminary estimate for planning and awareness. Đây là ước tính sơ bộ phục vụ lập kế hoạch và tuyên truyền.
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="bg-white shadow-xl rounded-lg p-6 sm:p-8 lg:p-10 max-w-md w-full">
+        {/* Language Toggle Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={toggleLanguage}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm transition duration-150 ease-in-out"
+          >
+            {t.toggleLang}
+          </button>
         </div>
 
-        <div className='mt-8 grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='bg-white rounded-xl shadow-sm border border-slate-100 p-6'>
-            <h3 className='text-sm font-semibold text-slate-900 mb-3'>
-              How to use / Cách sử dụng
-            </h3>
-            <ul className='list-disc list-inside space-y-2 text-sm text-slate-600'>
-              <li>Collect the latest population data. Thu thập số liệu dân số mới nhất.</li>
-              <li>Choose an emission factor suitable for your area. Chọn hệ số phát thải phù hợp khu vực.</li>
-              <li>Compare yearly and monthly outputs. So sánh kết quả theo năm và theo tháng.</li>
-              <li>Update figures every year. Cập nhật con số hằng năm.</li>
-            </ul>
-          </div>
-          <div className='bg-white rounded-xl shadow-sm border border-slate-100 p-6'>
-            <h3 className='text-sm font-semibold text-slate-900 mb-3'>
-              Notes / Lưu ý
-            </h3>
-            <p className='text-sm text-slate-600 mb-3'>
-              Electronic waste typically includes phones, computers, TVs, small appliances and office equipment. Rác thải điện tử thường gồm điện thoại, máy tính, tivi, thiết bị gia dụng nhỏ và thiết bị văn phòng.
-            </p>
-            <p className='text-sm text-slate-500'>
-              If you have device-level data, you can refine the emission factor. Nếu có số liệu cấp thiết bị, bạn có thể tinh chỉnh hệ số phát thải.
-            </p>
-          </div>
-        </div>
-      </main>
+        {/* Title and Description */}
+        <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+          {t.title}
+        </h1>
+        <p className="text-gray-600 mb-6 text-center">
+          {t.description}
+        </p>
 
-      <footer className='max-w-5xl mx-auto px-4 py-6 text-center text-xs text-slate-400'>
-        Designed for bilingual reporting (EN-VI). Thiết kế phục vụ báo cáo song ngữ (Anh-Việt).
-      </footer>
+        {/* Population Input Field */}
+        <div className="mb-5">
+          <label htmlFor="population" className="block text-gray-700 text-sm font-medium mb-2">
+            {t.populationLabel}
+          </label>
+          <input
+            type="number"
+            id="population"
+            className="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={t.placeholderPopulation}
+            value={population}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              setPopulation(isNaN(value) ? '' : value);
+            }}
+            min="0"
+          />
+        </div>
+
+        {/* Emission Factor Input Field */}
+        <div className="mb-6">
+          <label htmlFor="emissionFactor" className="block text-gray-700 text-sm font-medium mb-2">
+            {t.emissionFactorLabel}
+          </label>
+          <input
+            type="number"
+            id="emissionFactor"
+            className="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={t.placeholderEmissionFactor}
+            value={emissionFactor}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              setEmissionFactor(isNaN(value) ? '' : value);
+            }}
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        {/* Calculate Button */}
+        <button
+          onClick={handleCalculate}
+          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out mb-6"
+        >
+          {t.calculateButton}
+        </button>
+
+        {/* Display Result */}
+        {eWasteResult !== null && (
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md text-center">
+            <p className="text-lg font-semibold text-blue-800">
+              {t.resultPrefix}
+              <span className="text-xl font-bold text-blue-900">
+                {eWasteResult.toFixed(2)}
+              </span>
+              {t.resultSuffix}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default HomePage;
+export default EwasteCalculator;
