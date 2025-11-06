@@ -1,218 +1,288 @@
-import { useState, useEffect } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import React, { useState } from 'react';
 
-interface DeviceType {
-  name: string
-  emissionFactor: number
-  percentage: number
-  totalWaste?: number
-}
-
-interface CalculationResult {
-  totalWaste: number
-  perCapitaWaste: number
-  monthlyWaste: number
-  yearlyWaste: number
-  deviceBreakdown: DeviceType[]
-}
-
-export default function EwasteCalculator() {
-  const [population, setPopulation] = useState<number>(1000000)
-  const [emissionFactor, setEmissionFactor] = useState<number>(5.5)
-  const [timeframe, setTimeframe] = useState<string>('year')
-  const [deviceTypes, setDeviceTypes] = useState<DeviceType[]>([
-    { name: 'Điện thoại', emissionFactor: 0.2, percentage: 30 },
-    { name: 'Máy tính', emissionFactor: 3.5, percentage: 25 },
-    { name: 'TV', emissionFactor: 15.0, percentage: 20 },
-    { name: 'Tủ lạnh', emissionFactor: 50.0, percentage: 15 },
-    { name: 'Máy giặt', emissionFactor: 35.0, percentage: 10 }
-  ])
-  const [result, setResult] = useState<CalculationResult | null>(null)
-
-  const calculateWaste = () => {
-    const totalWaste = population * emissionFactor
-    const perCapitaWaste = emissionFactor
-    
-    let timeMultiplier = 1
-    if (timeframe === 'month') timeMultiplier = 1 / 12
-    else if (timeframe === 'quarter') timeMultiplier = 0.25
-    
-    const adjustedWaste = totalWaste * timeMultiplier
-    
-    const deviceBreakdown = deviceTypes.map(device => ({
-      ...device,
-      totalWaste: adjustedWaste * device.percentage / 100
-    }))
-    
-    setResult({
-      totalWaste: adjustedWaste,
-      perCapitaWaste,
-      monthlyWaste: timeframe === 'year' ? totalWaste / 12 : adjustedWaste,
-      yearlyWaste: timeframe === 'year' ? totalWaste : adjustedWaste * 12,
-      deviceBreakdown
-    })
+// Define translations for English and Vietnamese
+const translations = {
+  en: {
+    title: "E-waste Calculation",
+    description: "Estimate electronic waste based on population and emission factor.",
+    populationLabel: "Population",
+    emissionFactorLabel: "Emission Factor (kg/person)",
+    calculateButton: "Calculate E-waste",
+    estimatedEwaste: "Estimated E-waste:",
+    unit: "kg",
+    toggleLang: "Tiếng Việt",
+    placeholderPopulation: "Enter population",
+    placeholderEmissionFactor: "Enter emission factor",
+    resultPrefix: "Estimated E-waste: ",
+    resultSuffix: " kg"
+  },
+  vi: {
+    title: "Tính toán chất thải điện tử",
+    description: "Ước tính lượng chất thải điện tử dựa trên dân số và hệ số phát thải.",
+    populationLabel: "Dân số",
+    emissionFactorLabel: "Hệ số phát thải (kg/người)",
+    calculateButton: "Tính toán chất thải điện tử",
+    estimatedEwaste: "Lượng chất thải điện tử ước tính:",
+    unit: "kg",
+    toggleLang: "English",
+    placeholderPopulation: "Nhập dân số",
+    placeholderEmissionFactor: "Nhập hệ số phát thải",
+    resultPrefix: "Lượng chất thải điện tử ước tính: ",
+    resultSuffix: " kg"
   }
+};
 
-  useEffect(() => {
-    calculateWaste()
-  }, [population, emissionFactor, timeframe, deviceTypes])
+const EwasteCalculator: React.FC = () => {
+  const [population, setPopulation] = useState<number | ''>('');
+  const [emissionFactor, setEmissionFactor] = useState<number | ''>('');
+  const [eWasteResult, setEwasteResult] = useState<number | null>(null);
+  const [language, setLanguage] = useState<'en' | 'vi'>('en');
 
-  const updateDevicePercentage = (index: number, percentage: number) => {
-    const newDevices = [...deviceTypes]
-    newDevices[index].percentage = percentage
-    setDeviceTypes(newDevices)
-  }
+  // Get current translation object based on selected language
+  const t = translations[language];
 
-  const COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6']
+  // Handle the calculation logic
+  const handleCalculate = () => {
+    if (typeof population === 'number' && typeof emissionFactor === 'number' && population >= 0 && emissionFactor >= 0) {
+      const result = population * emissionFactor;
+      setEwasteResult(result);
+    } else {
+      setEwasteResult(null); // Clear result if inputs are invalid or negative
+    }
+  };
+
+  // Toggle between English and Vietnamese languages
+  const toggleLanguage = () => {
+    setLanguage(prevLang => (prevLang === 'en' ? 'vi' : 'en'));
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Máy Tính Chất Thải Điện Tử
-          </h1>
-          <p className="text-lg text-gray-600">
-            Tính toán lượng chất thải điện tử phát sinh dựa trên dân số và hệ số phát thải
-          </p>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="bg-white shadow-xl rounded-lg p-6 sm:p-8 lg:p-10 max-w-md w-full">
+        {/* Language Toggle Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={toggleLanguage}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm transition duration-150 ease-in-out"
+          >
+            {t.toggleLang}
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Input Section */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              Thông Số Đầu Vào
-            </h2>
-            
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dân số (người)
-                </label>
-                <input
-                  type="number"
-                  value={population}
-                  onChange={(e) => setPopulation(Number(e.target.value))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  min={1}
-                />
-              </div>
+        {/* Title and Description */}
+        <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+          {t.title}
+        </h1>
+        <p className="text-gray-600 mb-6 text-center">
+          {t.description}
+        </p>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hệ số phát thải bình quân (kg/người)
-                </label>
-                <input
-                  type="number"
-                  step={0.1}
-                  value={emissionFactor}
-                  onChange={(e) => setEmissionFactor(Number(e.target.value))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  min={0}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Thời gian tính toán
-                </label>
-                <select
-                  value={timeframe}
-                  onChange={(e) => setTimeframe(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="month">Tháng</option>
-                  <option value="quarter">Quý</option>
-                  <option value="year">Năm</option>
-                </select>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">
-                  Tỷ lệ theo loại thiết bị (%)
-                </h3>
-                <div className="space-y-3">
-                  {deviceTypes.map((device, index) => (
-                    <div key={device.name} className="flex items-center space-x-3">
-                      <span className="w-20 text-sm text-gray-700">{device.name}</span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={100}
-                        value={device.percentage}
-                        onChange={(e) => updateDevicePercentage(index, Number(e.target.value))}
-                        className="flex-1"
-                      />
-                      <span className="w-12 text-sm text-gray-600">{device.percentage}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Results Section */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              Kết Quả Tính Toán
-            </h2>
-            {result ? (
-              <>
-                <div className="mb-6">
-                  <p className="text-lg text-gray-700">
-                    <strong>Tổng lượng chất thải:</strong> {result.totalWaste.toFixed(2)} kg
-                  </p>
-                  <p className="text-lg text-gray-700">
-                    <strong>Lượng chất thải bình quân đầu người:</strong> {result.perCapitaWaste.toFixed(2)} kg
-                  </p>
-                  <p className="text-lg text-gray-700">
-                    <strong>Lượng chất thải hàng tháng:</strong> {result.monthlyWaste.toFixed(2)} kg
-                  </p>
-                  <p className="text-lg text-gray-700">
-                    <strong>Lượng chất thải hàng năm:</strong> {result.yearlyWaste.toFixed(2)} kg
-                  </p>
-                </div>
-
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Phân bố theo loại thiết bị</h3>
-
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={result.deviceBreakdown}
-                      dataKey="totalWaste"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      fill="#8884d8"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {result.deviceBreakdown.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value: number) => `${value.toFixed(2)} kg`} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-
-                <div className="mt-6">
-                  <h4 className="text-lg font-semibold mb-2">Chi tiết lượng chất thải theo thiết bị</h4>
-                  <ul className="list-disc list-inside text-gray-700">
-                    {result.deviceBreakdown.map((device, index) => (
-                      <li key={device.name}>
-                        {device.name}: {device.totalWaste?.toFixed(2)} kg
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </>
-            ) : (
-              <p>Vui lòng nhập dữ liệu để xem kết quả.</p>
-            )}
-          </div>
+        {/* Population Input Field */}
+        <div className="mb-5">
+          <label htmlFor="population" className="block text-gray-700 text-sm font-medium mb-2">
+            {t.populationLabel}
+          </label>
+          <input
+            type="number"
+            id="population"
+            className="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={t.placeholderPopulation}
+            value={population}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              setPopulation(isNaN(value) ? '' : value);
+            }}
+            min="0"
+          />
         </div>
+
+        {/* Emission Factor Input Field */}
+        <div className="mb-6">
+          <label htmlFor="emissionFactor" className="block text-gray-700 text-sm font-medium mb-2">
+            {t.emissionFactorLabel}
+          </label>
+          <input
+            type="number"
+            id="emissionFactor"
+            className="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={t.placeholderEmissionFactor}
+            value={emissionFactor}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              setEmissionFactor(isNaN(value) ? '' : value);
+            }}
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        {/* Calculate Button */}
+        <button
+          onClick={handleCalculate}
+          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out mb-6"
+        >
+          {t.calculateButton}
+        </button>
+
+        {/* Display Result */}
+        {eWasteResult !== null && (
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md text-center">
+            <p className="text-lg font-semibold text-blue-800">
+              {t.resultPrefix}
+              <span className="text-xl font-bold text-blue-900">
+                {eWasteResult.toFixed(2)}
+              </span>
+              {t.resultSuffix}
+            </p>
+          </div>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default EwasteCalculator;
+import React, { useState } from 'react';
+
+// Define translations for English and Vietnamese
+const translations = {
+  en: {
+    title: "E-waste Calculation",
+    description: "Estimate electronic waste based on population and emission factor.",
+    populationLabel: "Population",
+    emissionFactorLabel: "Emission Factor (kg/person)",
+    calculateButton: "Calculate E-waste",
+    estimatedEwaste: "Estimated E-waste:",
+    unit: "kg",
+    toggleLang: "Tiếng Việt",
+    placeholderPopulation: "Enter population",
+    placeholderEmissionFactor: "Enter emission factor",
+    resultPrefix: "Estimated E-waste: ",
+    resultSuffix: " kg"
+  },
+  vi: {
+    title: "Tính toán chất thải điện tử",
+    description: "Ước tính lượng chất thải điện tử dựa trên dân số và hệ số phát thải.",
+    populationLabel: "Dân số",
+    emissionFactorLabel: "Hệ số phát thải (kg/người)",
+    calculateButton: "Tính toán chất thải điện tử",
+    estimatedEwaste: "Lượng chất thải điện tử ước tính:",
+    unit: "kg",
+    toggleLang: "English",
+    placeholderPopulation: "Nhập dân số",
+    placeholderEmissionFactor: "Nhập hệ số phát thải",
+    resultPrefix: "Lượng chất thải điện tử ước tính: ",
+    resultSuffix: " kg"
+  }
+};
+
+const EwasteCalculator: React.FC = () => {
+  const [population, setPopulation] = useState<number | ''>('');
+  const [emissionFactor, setEmissionFactor] = useState<number | ''>('');
+  const [eWasteResult, setEwasteResult] = useState<number | null>(null);
+  const [language, setLanguage] = useState<'en' | 'vi'>('en');
+
+  // Get current translation object based on selected language
+  const t = translations[language];
+
+  // Handle the calculation logic
+  const handleCalculate = () => {
+    if (typeof population === 'number' && typeof emissionFactor === 'number' && population >= 0 && emissionFactor >= 0) {
+      const result = population * emissionFactor;
+      setEwasteResult(result);
+    } else {
+      setEwasteResult(null); // Clear result if inputs are invalid or negative
+    }
+  };
+
+  // Toggle between English and Vietnamese languages
+  const toggleLanguage = () => {
+    setLanguage(prevLang => (prevLang === 'en' ? 'vi' : 'en'));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="bg-white shadow-xl rounded-lg p-6 sm:p-8 lg:p-10 max-w-md w-full">
+        {/* Language Toggle Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={toggleLanguage}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm transition duration-150 ease-in-out"
+          >
+            {t.toggleLang}
+          </button>
+        </div>
+
+        {/* Title and Description */}
+        <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+          {t.title}
+        </h1>
+        <p className="text-gray-600 mb-6 text-center">
+          {t.description}
+        </p>
+
+        {/* Population Input Field */}
+        <div className="mb-5">
+          <label htmlFor="population" className="block text-gray-700 text-sm font-medium mb-2">
+            {t.populationLabel}
+          </label>
+          <input
+            type="number"
+            id="population"
+            className="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={t.placeholderPopulation}
+            value={population}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              setPopulation(isNaN(value) ? '' : value);
+            }}
+            min="0"
+          />
+        </div>
+
+        {/* Emission Factor Input Field */}
+        <div className="mb-6">
+          <label htmlFor="emissionFactor" className="block text-gray-700 text-sm font-medium mb-2">
+            {t.emissionFactorLabel}
+          </label>
+          <input
+            type="number"
+            id="emissionFactor"
+            className="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder={t.placeholderEmissionFactor}
+            value={emissionFactor}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              setEmissionFactor(isNaN(value) ? '' : value);
+            }}
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        {/* Calculate Button */}
+        <button
+          onClick={handleCalculate}
+          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out mb-6"
+        >
+          {t.calculateButton}
+        </button>
+
+        {/* Display Result */}
+        {eWasteResult !== null && (
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md text-center">
+            <p className="text-lg font-semibold text-blue-800">
+              {t.resultPrefix}
+              <span className="text-xl font-bold text-blue-900">
+                {eWasteResult.toFixed(2)}
+              </span>
+              {t.resultSuffix}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default EwasteCalculator;
