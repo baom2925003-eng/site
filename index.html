@@ -1,144 +1,417 @@
-import React, { useState } from 'react';
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính Toán Chất Thải Điện Tử</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-// Define translations for English and Vietnamese
-const translations = {
-  en: {
-    title: "E-waste Calculation",
-    description: "Estimate electronic waste based on population and emission factor.",
-    populationLabel: "Population",
-    emissionFactorLabel: "Emission Factor (kg/person)",
-    calculateButton: "Calculate E-waste",
-    estimatedEwaste: "Estimated E-waste:",
-    unit: "kg",
-    toggleLang: "Tiếng Việt",
-    placeholderPopulation: "Enter population",
-    placeholderEmissionFactor: "Enter emission factor",
-    resultPrefix: "Estimated E-waste: ",
-    resultSuffix: " kg"
-  },
-  vi: {
-    title: "Tính toán chất thải điện tử",
-    description: "Ước tính lượng chất thải điện tử dựa trên dân số và hệ số phát thải.",
-    populationLabel: "Dân số",
-    emissionFactorLabel: "Hệ số phát thải (kg/người)",
-    calculateButton: "Tính toán chất thải điện tử",
-    estimatedEwaste: "Lượng chất thải điện tử ước tính:",
-    unit: "kg",
-    toggleLang: "English",
-    placeholderPopulation: "Nhập dân số",
-    placeholderEmissionFactor: "Nhập hệ số phát thải",
-    resultPrefix: "Lượng chất thải điện tử ước tính: ",
-    resultSuffix: " kg"
-  }
-};
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-const EwasteCalculator: React.FC = () => {
-  const [population, setPopulation] = useState<number | ''>('');
-  const [emissionFactor, setEmissionFactor] = useState<number | ''>('');
-  const [eWasteResult, setEwasteResult] = useState<number | null>(null);
-  const [language, setLanguage] = useState<'en' | 'vi'>('en');
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-  // Get current translation object based on selected language
-  const t = translations[language];
+        header {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+            animation: fadeIn 1s ease-in;
+        }
 
-  // Handle the calculation logic
-  const handleCalculate = () => {
-    if (typeof population === 'number' && typeof emissionFactor === 'number' && population >= 0 && emissionFactor >= 0) {
-      const result = population * emissionFactor;
-      setEwasteResult(result);
-    } else {
-      setEwasteResult(null); // Clear result if inputs are invalid or negative
-    }
-  };
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
 
-  // Toggle between English and Vietnamese languages
-  const toggleLanguage = () => {
-    setLanguage(prevLang => (prevLang === 'en' ? 'vi' : 'en'));
-  };
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="bg-white shadow-xl rounded-lg p-6 sm:p-8 lg:p-10 max-w-md w-full">
-        {/* Language Toggle Button */}
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={toggleLanguage}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm transition duration-150 ease-in-out"
-          >
-            {t.toggleLang}
-          </button>
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group small {
+            display: block;
+            color: #888;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #555;
+        }
+
+        .result-box {
+            background: #f8f9ff;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .result-value {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .info-section {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .info-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            padding: 5px 0;
+            color: #666;
+        }
+
+        .info-section li:before {
+            content: "▸ ";
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .stat-card p {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌍 Hệ Thống Tính Toán Chất Thải Điện Tử</h1>
+            <p>Công cụ ước tính khối lượng rác thải điện tử dựa trên dân số và hệ số phát thải</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Form nhập liệu -->
+            <div class="card">
+                <h2>📊 Thông Tin Đầu Vào</h2>
+                
+                <div class="input-group">
+                    <label for="location">Khu vực/Địa điểm:</label>
+                    <input type="text" id="location" placeholder="Ví dụ: TP. Hồ Chí Minh">
+                </div>
+
+                <div class="input-group">
+                    <label for="population">Dân số (người):</label>
+                    <input type="number" id="population" placeholder="Nhập số dân">
+                    <small>Nhập tổng dân số của khu vực cần tính toán</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="emission">Hệ số phát thải (kg/người/năm):</label>
+                    <input type="number" id="emission" step="0.1" placeholder="Ví dụ: 7.3">
+                    <small>Hệ số phát thải điện tử trung bình đầu người</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="year">Năm tính toán:</label>
+                    <select id="year">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="calculate()">Tính Toán</button>
+                <button class="btn btn-secondary" onclick="reset()">Làm Mới</button>
+
+                <div class="result-box" id="resultBox">
+                    <h3>📈 Kết Quả Tính Toán</h3>
+                    <div class="result-item">
+                        <span>Tổng khối lượng chất thải:</span>
+                        <span class="result-value" id="totalWaste">0 kg</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Quy đổi ra tấn:</span>
+                        <span class="result-value" id="totalWasteTon">0 tấn</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Trung bình mỗi ngày:</span>
+                        <span class="result-value" id="dailyWaste">0 kg</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin và thống kê -->
+            <div class="card">
+                <h2>📚 Thông Tin Chất Thải Điện Tử</h2>
+                
+                <div class="info-section">
+                    <h3>Các loại chất thải điện tử phổ biến:</h3>
+                    <ul>
+                        <li>Điện thoại di động và phụ kiện</li>
+                        <li>Máy tính, laptop, màn hình</li>
+                        <li>Thiết bị gia dụng (TV, tủ lạnh, máy giặt)</li>
+                        <li>Pin và ắc quy các loại</li>
+                        <li>Thiết bị điện tử tiêu dùng khác</li>
+                    </ul>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h4>TB Thế giới</h4>
+                        <p>7.3 kg/người</p>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h4>TB Châu Á</h4>
+                        <p>5.6 kg/người</p>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <h4>TB Việt Nam</h4>
+                        <p>6.4 kg/người</p>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <h4>Tỷ lệ tái chế</h4>
+                        <p>~20%</p>
+                    </div>
+                </div>
+
+                <div class="info-section" style="margin-top: 20px;">
+                    <h3>💡 Lưu ý:</h3>
+                    <ul>
+                        <li>Hệ số phát thải thay đổi theo từng quốc gia và vùng lãnh thổ</li>
+                        <li>Các nước phát triển thường có hệ số cao hơn (15-20 kg/người/năm)</li>
+                        <li>Cần có chính sách quản lý và tái chế phù hợp</li>
+                        <li>Chất thải điện tử chứa nhiều kim loại quý có thể tái chế</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-
-        {/* Title and Description */}
-        <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">
-          {t.title}
-        </h1>
-        <p className="text-gray-600 mb-6 text-center">
-          {t.description}
-        </p>
-
-        {/* Population Input Field */}
-        <div className="mb-5">
-          <label htmlFor="population" className="block text-gray-700 text-sm font-medium mb-2">
-            {t.populationLabel}
-          </label>
-          <input
-            type="number"
-            id="population"
-            className="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={t.placeholderPopulation}
-            value={population}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              setPopulation(isNaN(value) ? '' : value);
-            }}
-            min="0"
-          />
-        </div>
-
-        {/* Emission Factor Input Field */}
-        <div className="mb-6">
-          <label htmlFor="emissionFactor" className="block text-gray-700 text-sm font-medium mb-2">
-            {t.emissionFactorLabel}
-          </label>
-          <input
-            type="number"
-            id="emissionFactor"
-            className="shadow-sm appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={t.placeholderEmissionFactor}
-            value={emissionFactor}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              setEmissionFactor(isNaN(value) ? '' : value);
-            }}
-            min="0"
-            step="0.01"
-          />
-        </div>
-
-        {/* Calculate Button */}
-        <button
-          onClick={handleCalculate}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-150 ease-in-out mb-6"
-        >
-          {t.calculateButton}
-        </button>
-
-        {/* Display Result */}
-        {eWasteResult !== null && (
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md text-center">
-            <p className="text-lg font-semibold text-blue-800">
-              {t.resultPrefix}
-              <span className="text-xl font-bold text-blue-900">
-                {eWasteResult.toFixed(2)}
-              </span>
-              {t.resultSuffix}
-            </p>
-          </div>
-        )}
-      </div>
     </div>
-  );
-};
 
-export default EwasteCalculator;
+    <script>
+        function calculate() {
+            // Lấy giá trị từ form
+            const location = document.getElementById('location').value;
+            const population = parseFloat(document.getElementById('population').value);
+            const emission = parseFloat(document.getElementById('emission').value);
+            const year = document.getElementById('year').value;
+
+            // Kiểm tra dữ liệu đầu vào
+            if (!population || !emission) {
+                alert('Vui lòng nhập đầy đủ dân số và hệ số phát thải!');
+                return;
+            }
+
+            if (population <= 0 || emission <= 0) {
+                alert('Dân số và hệ số phát thải phải lớn hơn 0!');
+                return;
+            }
+
+            // Tính toán
+            const totalWaste = population * emission; // kg/năm
+            const totalWasteTon = totalWaste / 1000; // tấn/năm
+            const dailyWaste = totalWaste / 365; // kg/ngày
+
+            // Hiển thị kết quả
+            document.getElementById('totalWaste').textContent = formatNumber(totalWaste) + ' kg/năm';
+            document.getElementById('totalWasteTon').textContent = formatNumber(totalWasteTon) + ' tấn/năm';
+            document.getElementById('dailyWaste').textContent = formatNumber(dailyWaste) + ' kg/ngày';
+
+            // Hiển thị box kết quả
+            document.getElementById('resultBox').classList.add('show');
+
+            // Lưu lịch sử tính toán (nếu cần)
+            saveCalculation(location, population, emission, year, totalWaste);
+        }
+
+        function reset() {
+            document.getElementById('location').value = '';
+            document.getElementById('population').value = '';
+            document.getElementById('emission').value = '';
+            document.getElementById('year').value = '2024';
+            document.getElementById('resultBox').classList.remove('show');
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+        }
+
+        function saveCalculation(location, population, emission, year, result) {
+            // Có thể lưu vào localStorage để xem lịch sử
+            const history = JSON.parse(localStorage.getItem('wasteHistory') || '[]');
+            history.push({
+                date: new Date().toLocaleDateString('vi-VN'),
+                location: location || 'Không xác định',
+                population: population,
+                emission: emission,
+                year: year,
+                result: result
+            });
+            
+            // Giữ tối đa 10 lịch sử gần nhất
+            if (history.length > 10) {
+                history.shift();
+            }
+            
+            localStorage.setItem('wasteHistory', JSON.stringify(history));
+        }
+
+        // Tự động điền hệ số mẫu khi tải trang
+        window.onload = function() {
+            document.getElementById('emission').placeholder = '7.3 (Trung bình thế giới)';
+        }
+    </script>
+</body>
+</html>
