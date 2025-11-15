@@ -1,1 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bản đồ Phường Long Bình - Cần Thơ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .map-container {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+
+        .map-wrapper {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .map-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-section {
+            padding: 40px;
+            background: white;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .info-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .info-card ul {
+            list-style: none;
+            line-height: 1.8;
+        }
+
+        .info-card ul li:before {
+            content: "▸ ";
+            font-weight: bold;
+        }
+
+        .legend {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .legend h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .legend-line {
+            width: 50px;
+            height: 3px;
+            background: #333;
+            margin-right: 15px;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .map-container {
+                padding: 20px;
+            }
+            
+            .info-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ Bản Đồ Hành Chính</h1>
+            <p>Phường Long Bình - Quận Ô Môn - Thành phố Cần Thơ</p>
+        </div>
+
+        <div class="map-container">
+            <div class="map-wrapper">
+                <img src="map.png" alt="Bản đồ Phường Long Bình" class="map-image">
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 style="color: #667eea; margin-bottom: 20px; font-size: 2em;">📍 Thông Tin Khu Vực</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Vị Trí Địa Lý</h3>
+                    <ul>
+                        <li>Quận Ô Môn</li>
+                        <li>Thành phố Cần Thơ</li>
+                        <li>Vùng ĐBSCL</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>Giới Hạn Hành Chính</h3>
+                    <ul>
+                        <li>Phía Bắc: Phường Long Bình</li>
+                        <li>Phía Tây: Xã Xã Phiên</li>
+                        <li>Phía Nam: Phường Long Phú 1</li>
+                        <li>Phía Đông: Xã Phường Bình</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3>Hệ Thống Giao Thông</h3>
+                    <ul>
+                        <li>Đường giao thông chính</li>
+                        <li>Hệ thống đường nội bộ</li>
+                        <li>Kênh rạch nội đồng</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="legend">
+                <h3>📋 Chú Giải Bản Đồ</h3>
+                <div class="legend-item">
+                    <div class="legend-line"></div>
+                    <span>Đường giao thông</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line" style="background: #4299e1;"></div>
+                    <span>Sông, kênh rạch</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line" style="background: #48bb78; height: 20px; width: 40px;"></div>
+                    <span>Ranh giới hành chính</span>
+                </div>
+                <p style="margin-top: 20px; color: #666;">
+                    <strong>Hệ tọa độ:</strong> VN-2000 (Zone 6) | <strong>Tỷ lệ:</strong> 1:50,000 | <strong>Đơn vị:</strong> mét
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2024 Bản đồ hành chính Phường Long Bình, Quận Ô Môn, TP. Cần Thơ</p>
+        </div>
+    </div>
+</body>
+</html>
