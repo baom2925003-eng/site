@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chia Sẻ Hình Ảnh</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .upload-section {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+        
+        .upload-area:hover {
+            background: #eff1ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+        
+        .upload-area.dragover {
+            background: #e0e7ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: #999;
+            font-size: 14px;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin: 10px 0;
+            font-family: inherit;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .preview-section {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .preview-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .gallery-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        }
+        
+        .gallery-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .gallery-info {
+            padding: 20px;
+        }
+        
+        .gallery-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .gallery-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .gallery-date {
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .delete-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .delete-btn:hover {
+            background: #ee2f3b;
+            transform: scale(1.05);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-text {
+            color: #999;
+            font-size: 18px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 10px;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖼️ Website Chia Sẻ Hình Ảnh</h1>
+            <p class="subtitle">Upload hình ảnh và chia sẻ với mọi người</p>
+        </header>
+        
+        <div class="upload-section">
+            <h2 style="margin-bottom: 20px; color: #333;">📤 Upload Hình Ảnh</h2>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">🖼️</div>
+                <div class="upload-text">Click hoặc kéo thả hình ảnh vào đây</div>
+                <div class="upload-hint">Hỗ trợ: JPG, PNG, GIF, WebP</div>
+            </div>
+            
+            <input type="file" id="fileInput" accept="image/*" multiple>
+            
+            <div class="preview-section" id="previewSection">
+                <h3 style="margin-bottom: 15px; color: #333;">Preview:</h3>
+                <img id="previewImage" class="preview-image" alt="Preview">
+                
+                <input type="text" id="imageTitle" placeholder="Tiêu đề hình ảnh (tùy chọn)">
+                <textarea id="imageDescription" placeholder="Mô tả hình ảnh (tùy chọn)"></textarea>
+                
+                <button class="btn" id="uploadBtn">Đăng Tải Hình Ảnh</button>
+            </div>
+        </div>
+        
+        <div id="galleryContainer">
+            <h2 style="color: white; margin-bottom: 20px; text-align: center;">🎨 Thư Viện Hình Ảnh</h2>
+            <div class="gallery" id="gallery"></div>
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">📭</div>
+                <div class="empty-text">Chưa có hình ảnh nào. Hãy upload hình ảnh đầu tiên!</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">×</button>
+            <img class="modal-image" id="modalImage" alt="Full view">
+            <div class="modal-info" id="modalInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const previewImage = document.getElementById('previewImage');
+        const imageTitle = document.getElementById('imageTitle');
+        const imageDescription = document.getElementById('imageDescription');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const gallery = document.getElementById('gallery');
+        const emptyState = document.getElementById('emptyState');
+        const modal = document.getElementById('modal');
+        const modalClose = document.getElementById('modalClose');
+        const modalImage = document.getElementById('modalImage');
+        const modalInfo = document.getElementById('modalInfo');
+        
+        let currentImageData = null;
+        let images = {};
+        
+        // Load images from memory
+        function loadImages() {
+            gallery.innerHTML = '';
+            const imageKeys = Object.keys(images);
+            
+            if (imageKeys.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            imageKeys.reverse().forEach(key => {
+                const img = images[key];
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `
+                    <img src="${img.data}" alt="${img.title}" class="gallery-image">
+                    <div class="gallery-info">
+                        <div class="gallery-title">${img.title || 'Không có tiêu đề'}</div>
+                        <div class="gallery-description">${img.description || 'Không có mô tả'}</div>
+                        <div class="gallery-date">📅 ${img.date}</div>
+                        <button class="delete-btn" onclick="deleteImage('${key}')">🗑️ Xóa</button>
+                    </div>
+                `;
+                
+                item.querySelector('.gallery-image').addEventListener('click', () => {
+                    openModal(img);
+                });
+                
+                gallery.appendChild(item);
+            });
+        }
+        
+        // Upload area interactions
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Vui lòng chọn file hình ảnh!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                currentImageData = e.target.result;
+                previewImage.src = currentImageData;
+                previewSection.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        uploadBtn.addEventListener('click', () => {
+            if (!currentImageData) return;
+            
+            const id = 'img_' + Date.now();
+            const newImage = {
+                id: id,
+                data: currentImageData,
+                title: imageTitle.value || 'Không có tiêu đề',
+                description: imageDescription.value || 'Không có mô tả',
+                date: new Date().toLocaleString('vi-VN')
+            };
+            
+            images[id] = newImage;
+            
+            loadImages();
+            
+            previewSection.style.display = 'none';
+            imageTitle.value = '';
+            imageDescription.value = '';
+            currentImageData = null;
+            fileInput.value = '';
+            
+            alert('✅ Đăng tải thành công!');
+            
+            window.scrollTo({
+                top: document.getElementById('galleryContainer').offsetTop - 20,
+                behavior: 'smooth'
+            });
+        });
+        
+        function deleteImage(id) {
+            if (confirm('Bạn có chắc muốn xóa hình ảnh này?')) {
+                delete images[id];
+                loadImages();
+            }
+        }
+        
+        function openModal(img) {
+            modalImage.src = img.data;
+            modalInfo.innerHTML = `
+                <div class="gallery-title">${img.title}</div>
+                <div class="gallery-description">${img.description}</div>
+                <div class="gallery-date">${img.date}</div>
+            `;
+            modal.classList.add('active');
+        }
+        
+        modalClose.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+        
+        // Initial load
+        loadImages();
+    </script>
+</body>
+</html>
